@@ -28,6 +28,7 @@ preferences {
 	section("Garage Door") {
 		input "doorSwitch", "capability.momentary", title: "Opener", required: true
 		input "doorContactSensor", "capability.contactSensor", title: "Open/Close Sensor", required: true
+        input "doorAccelerationSensor", "capability.accelerationSensor",  title: "Movement Sensor", required: false
 	}
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
@@ -54,6 +55,9 @@ def driverDeparted(evt) {
 def pushDoorSwitch(desiredState) {
 	if(doorContactSensor.currentContact == desiredState) {
     	log.info "Door will not be triggered because it is already ${desiredState}."
+    }
+    if(doorAccelerationSensor && doorAccelerationSensor.currentAcceleration == "active") {
+    	log.info "Door will not be triggered because it is currently in motion."
     }
 	doorSwitch.push()
 }
