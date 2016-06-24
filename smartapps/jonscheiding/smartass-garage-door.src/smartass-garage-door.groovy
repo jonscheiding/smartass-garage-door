@@ -27,6 +27,7 @@ definition(
 preferences {
 	section("Garage Door") {
 		input "doorSwitch", "capability.momentary", title: "Opener", required: true
+		input "doorContactSensor", "capability.contactSensor", title: "Open/Close Sensor", required: true
 	}
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
@@ -42,19 +43,18 @@ def driverPresence(evt) {
 
 def driverArrived(evt) {
 	log.info "Door to be opened due to arrival of ${driver.displayName}."
-	openDoor()
+	pushDoorSwitch("open")
 }
 
 def driverDeparted(evt) {
 	log.info "Door to be closed due to departure of ${driver.displayName}."
-    closeDoor()
+    pushDoorSwitch("closed")
 }
 
-def openDoor() {
-	doorSwitch.push()
-}
-
-def closeDoor() {
+def pushDoorSwitch(desiredState) {
+	if(doorContactSensor.currentContact == desiredState) {
+    	log.info "Door will not be triggered because it is already ${desiredState}."
+    }
 	doorSwitch.push()
 }
 
