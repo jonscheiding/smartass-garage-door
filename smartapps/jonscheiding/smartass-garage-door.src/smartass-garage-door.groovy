@@ -33,6 +33,9 @@ preferences {
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
 	}
+    section("Notifications") {
+    	input "shouldSendPush", "bool", title: "Send Push Notifications", required: false
+    }
 }
 
 def driverPresence(evt) {
@@ -43,23 +46,31 @@ def driverPresence(evt) {
 }
 
 def driverArrived(evt) {
-	log.info "Door to be opened due to arrival of ${driver.displayName}."
-	pushDoorSwitch("open")
+	pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
 }
 
 def driverDeparted(evt) {
-	log.info "Door to be closed due to departure of ${driver.displayName}."
-    pushDoorSwitch("closed")
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
 }
 
-def pushDoorSwitch(desiredState) {
+def pushDoorSwitch(desiredState, msg) {
+	log.info msg
 	if(doorContactSensor.currentContact == desiredState) {
     	log.info "Door will not be triggered because it is already ${desiredState}."
+        return
     }
     if(doorAccelerationSensor && doorAccelerationSensor.currentAcceleration == "active") {
     	log.info "Door will not be triggered because it is currently in motion."
+        return
     }
+    
+    notifyIfNecessary msg
 	doorSwitch.push()
+}
+
+def notifyIfNecessary(msg) {
+    if(shouldSendPush)
+    	sendPush msg
 }
 
 def installed() {
