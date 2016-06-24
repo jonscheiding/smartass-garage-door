@@ -74,5 +74,3 @@ def updated() {
 def initialize() {
 	subscribe(driver, "presence", driverPresence)
 }
-
-// TODO: implement event handlers
