@@ -18,10 +18,10 @@ definition(
     namespace: "jonscheiding",
     author: "Jon Scheiding",
     description: "Garage door app with the smarts to get by in this world.",
-    category: "",
+    category: "My Apps",
     iconUrl: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn.png",
-    iconX2Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@tx.png",
-    iconX3Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@tx.png")
+    iconX2Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png",
+    iconX3Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png")
 
 
 preferences {
