@@ -25,9 +25,26 @@ definition(
 
 
 preferences {
-	section("Title") {
-		// TODO: put inputs here
+	section("Garage Door") {
+		input "doorSwitch", "capability.momentary", title: "Opener", required: true
 	}
+    section("Car / Driver") {
+    	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
+	}
+}
+
+def driverPresence(evt) {
+	if(evt.value == "present") 
+    	driverArrived(evt)
+}
+
+def driverArrived(evt) {
+	log.info "Door to be opened due to arrival of ${driver.displayName}."
+	openDoor()
+}
+
+def openDoor() {
+	doorSwitch.push()
 }
 
 def installed() {
@@ -44,7 +61,7 @@ def updated() {
 }
 
 def initialize() {
-	// TODO: subscribe to attributes, devices, locations, etc.
+	subscribe(driver, "presence", driverPresence)
 }
 
 // TODO: implement event handlers
