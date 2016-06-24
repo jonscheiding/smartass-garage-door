@@ -36,6 +36,8 @@ preferences {
 def driverPresence(evt) {
 	if(evt.value == "present") 
     	driverArrived(evt)
+    else
+    	driverDeparted(evt)
 }
 
 def driverArrived(evt) {
@@ -43,7 +45,16 @@ def driverArrived(evt) {
 	openDoor()
 }
 
+def driverDeparted(evt) {
+	log.info "Door to be closed due to departure of ${driver.displayName}."
+    closeDoor()
+}
+
 def openDoor() {
+	doorSwitch.push()
+}
+
+def closeDoor() {
 	doorSwitch.push()
 }
 
