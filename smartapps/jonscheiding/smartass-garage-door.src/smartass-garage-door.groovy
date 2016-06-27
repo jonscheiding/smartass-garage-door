@@ -30,6 +30,9 @@ preferences {
 		input "doorContactSensor", "capability.contactSensor", title: "Open/Close Sensor", required: true
         input "doorAccelerationSensor", "capability.accelerationSensor",  title: "Movement Sensor", required: false
 	}
+    section("Interior Door") {
+    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: true
+    }
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
 	}
@@ -46,11 +49,19 @@ def driverPresence(evt) {
 }
 
 def driverArrived(evt) {
+	state.lastArrival = now()
 	pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
 }
 
 def driverDeparted(evt) {
     pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
+}
+
+def interiorDoorClosed(evt) {
+	if(now() - state.lastArrival > 5 * 60 * 1000)
+    	return
+    
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into house.")
 }
 
 def pushDoorSwitch(desiredState, msg) {
@@ -88,4 +99,6 @@ def updated() {
 
 def initialize() {
 	subscribe(driver, "presence", driverPresence)
+    if(interiorDoor)
+    	subscribe(interiorDoor, "contact.closed", interiorDoorClosed)
 }
