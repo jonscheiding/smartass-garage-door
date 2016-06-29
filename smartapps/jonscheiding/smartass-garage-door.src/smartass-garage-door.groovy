@@ -31,7 +31,7 @@ preferences {
         input "doorAccelerationSensor", "capability.accelerationSensor",  title: "Movement Sensor", required: false
 	}
     section("Interior Door") {
-    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
+    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: true
     }
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: false
