@@ -31,10 +31,10 @@ preferences {
         input "doorAccelerationSensor", "capability.accelerationSensor",  title: "Movement Sensor", required: false
 	}
     section("Interior Door") {
-    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: true
+    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
     }
     section("Car / Driver") {
-    	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
+    	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: false
 	}
     section("Notifications") {
     	input "shouldSendPush", "bool", title: "Send Push Notifications", required: false
@@ -98,7 +98,9 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(driver, "presence", driverPresence)
-    if(interiorDoor)
+	if(driver)
+		subscribe(driver, "presence", driverPresence)
+
+	if(interiorDoor)
     	subscribe(interiorDoor, "contact.closed", interiorDoorClosed)
 }
