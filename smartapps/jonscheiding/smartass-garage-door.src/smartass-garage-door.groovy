@@ -30,27 +30,37 @@ preferences {
 		input "doorContactSensor", "capability.contactSensor", title: "Open/Close Sensor", required: true
         input "doorAccelerationSensor", "capability.accelerationSensor",  title: "Movement Sensor", required: false
 	}
-    section("Interior Door") {
-    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
-    }
     section("Car / Driver") {
     	input "driver", "capability.presenceSensor", title: "Presence Sensor", required: true
 	}
+    section("Interior Door") {
+    	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
+    }
     section("Notifications") {
-    	input "shouldSendPush", "bool", title: "Send Push Notifications", required: false
+    	input "shouldSendPush", "bool", title: "Send Push Notifications"
+    }
+    section("Behavior") {
+        input "openOnArrival", "bool", title: "Open On Arrival"
+    	input "closeOnDeparture", "bool", title: "Close On Departure"
+        input "closeOnEntry", "bool", title: "Close On Interior Door Entry"
     }
 }
 
 def onDriverArrived(evt) {
 	state.lastArrival = now()
-	pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
+    
+    if(openOnArrival)
+		pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
 }
 
 def onDriverDeparted(evt) {
-    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
+    if(closeOnDeparture)
+    	pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
 }
 
 def onInteriorDoorOpened(evt) {
+	if(!closeOnEntry) return
+    
     def expirationMinutes = 15
     
 	if(state.lastArrival < state.lastClosed)
