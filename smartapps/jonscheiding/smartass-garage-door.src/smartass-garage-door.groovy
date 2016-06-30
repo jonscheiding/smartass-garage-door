@@ -43,6 +43,7 @@ preferences {
         input "openOnArrival", "bool", title: "Open On Arrival"
     	input "closeOnDeparture", "bool", title: "Close On Departure"
         input "closeOnEntry", "bool", title: "Close On Interior Door Entry"
+        input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true
     }
 }
 
@@ -73,6 +74,13 @@ def onInteriorDoorOpened(evt) {
 
 def onGarageDoorClosed(evt) {
     state.lastClosed = now()
+}
+
+def onModeChanged(evt) {
+	if(!closeOnModes) return
+    
+    if(closeOnModes?.find { it == evt.value })
+    	pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} because mode changed to ${evt.value}.")
 }
 
 def pushDoorSwitch(desiredState, msg) {
@@ -113,6 +121,8 @@ def initialize() {
     subscribe(driver, "presence.not present", onDriverDeparted)
 
     subscribe(doorContactSensor, "contact.closed", onGarageDoorClosed)
+    
+    subscribe(location, "mode", onModeChanged)
 
 	if(interiorDoor)
     	subscribe(interiorDoor, "contact.open", onInteriorDoorOpened)
