@@ -37,13 +37,13 @@ preferences {
     	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
     }
     section("Notifications") {
-    	input "shouldSendPush", "bool", title: "Send Push Notifications"
+    	input "shouldSendPush", "bool", title: "Send Push Notifications", defaultValue: true
     }
     section("Behavior") {
-        input "openOnArrival", "bool", title: "Open On Arrival"
-    	input "closeOnDeparture", "bool", title: "Close On Departure"
-        input "closeOnEntry", "bool", title: "Close On Interior Door Entry"
-        input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true
+        input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
+    	input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
+        input "closeOnEntry", "bool", title: "Close On Interior Door Entry", defaultValue: true
+        input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
     }
 }
 
