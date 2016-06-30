@@ -41,23 +41,16 @@ preferences {
     }
 }
 
-def driverPresence(evt) {
-	if(evt.value == "present") 
-    	driverArrived(evt)
-    else
-    	driverDeparted(evt)
-}
-
-def driverArrived(evt) {
+def onDriverArrived(evt) {
 	state.lastArrival = now()
 	pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
 }
 
-def driverDeparted(evt) {
+def onDriverDeparted(evt) {
     pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
 }
 
-def interiorDoorOpened(evt) {
+def onInteriorDoorOpened(evt) {
     def expirationMinutes = 15
     
 	if(state.lastArrival < state.lastClosed)
@@ -65,10 +58,10 @@ def interiorDoorOpened(evt) {
     if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
     	return
     
-    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into house.")
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
 }
 
-def garageDoorClosed(evt) {
+def onGarageDoorClosed(evt) {
     state.lastClosed = now()
 }
 
@@ -106,11 +99,11 @@ def updated() {
 }
 
 def initialize() {
-	if(driver)
-		subscribe(driver, "presence", driverPresence)
+    subscribe(driver, "presence.present", onDriverArrived)
+    subscribe(driver, "presence.not present", onDriverDeparted)
+
+    subscribe(doorContactSensor, "contact.closed", onGarageDoorClosed)
 
 	if(interiorDoor)
-    	subscribe(interiorDoor, "contact.open", interiorDoorOpened)
-        
-    subscribe(doorContactSensor, "contact.closed", garageDoorClosed)
+    	subscribe(interiorDoor, "contact.open", onInteriorDoorOpened)
 }
