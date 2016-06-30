@@ -58,10 +58,18 @@ def driverDeparted(evt) {
 }
 
 def interiorDoorClosed(evt) {
-	if(now() - state.lastArrival > 5 * 60 * 1000)
+    def expirationMinutes = 15
+    
+	if(state.lastArrival < state.lastClosed)
+    	return
+    if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
     	return
     
     pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into house.")
+}
+
+def garageDoorClosed(evt) {
+    state.lastClosed = now()
 }
 
 def pushDoorSwitch(desiredState, msg) {
@@ -103,4 +111,6 @@ def initialize() {
 
 	if(interiorDoor)
     	subscribe(interiorDoor, "contact.closed", interiorDoorClosed)
+        
+    subscribe(doorContactSensor, "contact.closed", garageDoorClosed)
 }
