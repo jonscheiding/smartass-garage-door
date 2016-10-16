@@ -37,7 +37,7 @@ preferences {
     	input "interiorDoor", "capability.contactSensor", title: "Open/Close Sensor", required: false
     }
     section("Notifications") {
-    	input "shouldSendPush", "bool", title: "Send Push Notifications", defaultValue: true
+    	input "shouldSendPush", "enum", title: "Push Notifications", defaultValue: "All", options: ["None", "All", "Notices"]
     }
     section("Behavior") {
         input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
@@ -84,23 +84,27 @@ def onModeChanged(evt) {
 }
 
 def pushDoorSwitch(desiredState, msg) {
-	log.info msg
 	if(doorContactSensor.currentContact == desiredState) {
-    	log.info "Door will not be triggered because it is already ${desiredState}."
+    	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because it is already ${desiredState}.", true
         return
     }
     if(doorAccelerationSensor && doorAccelerationSensor.currentAcceleration == "active") {
-    	log.info "Door will not be triggered because it is currently in motion."
+    	notifyIfNecessary "${doorSwitch.displayName}  will not be triggered because it is currently in motion.", true
         return
     }
     
-    notifyIfNecessary msg
+    notifyIfNecessary msg, false
 	doorSwitch.push()
 }
 
-def notifyIfNecessary(msg) {
-    if(shouldSendPush)
-    	sendPush msg
+def notifyIfNecessary(msg, isNotice = false) {
+	log.info msg
+    log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
+	if(shouldSendPush == 0 || (shouldSendPush == 2 && !isNotice)) {
+    	return
+    }
+    
+    sendPush msg
 }
 
 def installed() {
