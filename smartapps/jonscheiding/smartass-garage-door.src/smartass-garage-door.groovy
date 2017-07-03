@@ -49,7 +49,7 @@ preferences {
 
 def onDriverArrived(evt) {
 	state.lastArrival = now()
-	
+
 	if(openOnArrival)
 		pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
 }
@@ -63,12 +63,12 @@ def onInteriorDoorOpened(evt) {
 	if(!closeOnEntry) return
 	
 	def expirationMinutes = 15
-	
+
 	if(state.lastArrival < state.lastClosed)
 		return
 	if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
 		return
-	
+
 	pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
 }
 
@@ -78,7 +78,7 @@ def onGarageDoorClosed(evt) {
 
 def onModeChanged(evt) {
 	if(!closeOnModes) return
-	
+
 	if(closeOnModes?.find { it == evt.value })
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} because mode changed to ${evt.value}.")
 }
@@ -92,7 +92,7 @@ def pushDoorSwitch(desiredState, msg) {
 		notifyIfNecessary "${doorSwitch.displayName}  will not be triggered because it is currently in motion.", true
 		return
 	}
-	
+
 	notifyIfNecessary msg, false
 	doorSwitch.push()
 }
@@ -103,7 +103,7 @@ def notifyIfNecessary(msg, isNotice = false) {
 	if(shouldSendPush == 0 || (shouldSendPush == 2 && !isNotice)) {
 		return
 	}
-	
+
 	sendPush msg
 }
 
@@ -125,7 +125,7 @@ def initialize() {
 	subscribe(driver, "presence.not present", onDriverDeparted)
 
 	subscribe(doorContactSensor, "contact.closed", onGarageDoorClosed)
-	
+
 	subscribe(location, "mode", onModeChanged)
 
 	if(interiorDoor)
