@@ -41,6 +41,7 @@ preferences {
 	}
 	section("Behavior") {
 		input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
+        input "arrivalDebounceMinutes", "number", title: "Except Minutes After Departure", defaultValue: 0
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
 		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
@@ -50,11 +51,19 @@ preferences {
 def onDriverArrived(evt) {
 	state.lastArrival = now()
 
-	if(openOnArrival)
+	if(openOnArrival) {
+    	if(now() < state.lastDeparture + (arrivalDebounceMinutes * 60 * 1000)) {
+        	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} ago."
+            return
+        }
+    
 		pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
+    }
 }
 
 def onDriverDeparted(evt) {
+	state.lastDeparture = now()
+
 	if(closeOnDeparture)
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
 }
