@@ -42,7 +42,7 @@ preferences {
 	section("Behavior") {
 		input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
-		input "closeOnEntry", "bool", title: "Close On Interior Door Entry", defaultValue: true
+		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: ["Never", "Open", "Closed"]
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
 	}
 }
@@ -59,9 +59,7 @@ def onDriverDeparted(evt) {
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
 }
 
-def onInteriorDoorOpened(evt) {
-	if(!closeOnEntry) return
-	
+def onInteriorDoorEntry(evt) {
 	def expirationMinutes = 15
 
 	if(state.lastArrival < state.lastClosed)
@@ -128,6 +126,7 @@ def initialize() {
 
 	subscribe(location, "mode", onModeChanged)
 
-	if(interiorDoor)
-		subscribe(interiorDoor, "contact.open", onInteriorDoorOpened)
+	if(interiorDoor && closeOnEntry != "Never") {
+		subscribe(interiorDoor, "contact.${closeOnEntry.toLowerCase()}", onInteriorDoorEntry)
+	}
 }
