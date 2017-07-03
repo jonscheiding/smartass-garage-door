@@ -42,7 +42,7 @@ preferences {
 	section("Behavior") {
 		input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
-		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: ["Never", "Open", "Closed"]
+		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
 	}
 }
@@ -98,7 +98,7 @@ def pushDoorSwitch(desiredState, msg) {
 def notifyIfNecessary(msg, isNotice = false) {
 	log.info msg
 	log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
-	if(shouldSendPush == 0 || (shouldSendPush == 2 && !isNotice)) {
+	if(shouldSendPush == "0" || (shouldSendPush == "2" && !isNotice)) {
 		return
 	}
 
@@ -126,7 +126,8 @@ def initialize() {
 
 	subscribe(location, "mode", onModeChanged)
 
-	if(interiorDoor && closeOnEntry != "Never") {
-		subscribe(interiorDoor, "contact.${closeOnEntry.toLowerCase()}", onInteriorDoorEntry)
+	if(interiorDoor && closeOnEntry != "0") {
+    	def contactEvent = (closeOnEntry == "1") ? "open" : "closed"
+		subscribe(interiorDoor, "contact.${contactEvent}", onInteriorDoorEntry)
 	}
 }
