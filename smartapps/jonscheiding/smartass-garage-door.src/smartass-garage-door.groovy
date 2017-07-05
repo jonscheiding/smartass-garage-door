@@ -53,7 +53,7 @@ def onDriverArrived(evt) {
 
 	if(openOnArrival) {
     	if(now() < state.lastDeparture + (arrivalDebounceMinutes * 60 * 1000)) {
-        	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} ago."
+        	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} minutes ago."
             return
         }
     
