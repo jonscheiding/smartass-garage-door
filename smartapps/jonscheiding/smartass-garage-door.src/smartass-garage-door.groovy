@@ -41,7 +41,7 @@ preferences {
 	}
 	section("Behavior") {
 		input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
-        input "arrivalDebounceMinutes", "number", title: "Except Minutes After Departure", defaultValue: 0
+        input "arrivalDebounceMinutes", "number", title: "... Except Minutes After Departure", defaultValue: 0
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
 		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
         input "closeOnEntryDelay", "number", title: "... After Minutes", defaultValue: 0
