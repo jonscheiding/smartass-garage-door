@@ -44,6 +44,7 @@ preferences {
         input "arrivalDebounceMinutes", "number", title: "Except Minutes After Departure", defaultValue: 0
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
 		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
+        input "closeOnEntryDelay", "number", title: "... After Minutes", defaultValue: 0
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
 	}
 }
@@ -76,7 +77,19 @@ def onInteriorDoorEntry(evt) {
 	if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
 		return
 
-	pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
+    if(closeOnEntryDelay <= 0) {
+		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
+    } else {
+        state.lastEntry = now()
+        runIn(closeOnEntryDelay * 60, onEntryDelayExpired)
+    }
+}
+
+def onEntryDelayExpired() {
+	if(state.lastEntry + closeOnEntryDelay * 60 > now()) 
+    	return
+    
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
 }
 
 def onGarageDoorClosed(evt) {
