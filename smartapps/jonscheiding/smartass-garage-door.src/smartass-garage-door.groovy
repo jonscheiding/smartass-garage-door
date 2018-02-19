@@ -44,7 +44,7 @@ preferences {
         input "arrivalDebounceMinutes", "number", title: "... Except Minutes After Departure", defaultValue: 0
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
 		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
-        input "closeOnEntryDelay", "number", title: "... After Minutes", defaultValue: 0
+        input "closeOnEntryDelayMinutes", "number", title: "... After Minutes", defaultValue: 0
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
 	}
 }
@@ -57,7 +57,7 @@ def onDriverArrived(evt) {
         	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} minutes ago."
             return
         }
-    
+
 		pushDoorSwitch("open", "Opening ${doorSwitch.displayName} due to arrival of ${driver.displayName}.")
     }
 }
@@ -77,19 +77,22 @@ def onInteriorDoorEntry(evt) {
 	if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
 		return
 
-    if(closeOnEntryDelay <= 0) {
+    if(closeOnEntryDelayMinutes <= 0) {
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
+		state.lastArrival = 0
     } else {
         state.lastEntry = now()
-        runIn(closeOnEntryDelay * 60, onEntryDelayExpired)
+		notifyIfNecessary("Will close ${doorSwitch.displayName} in ${closeOnEntryDelayMinutes} due to entry into ${interiorDoor.displayName}.", true)
+        runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
     }
 }
 
 def onEntryDelayExpired() {
-	if(state.lastEntry + closeOnEntryDelay * 60 > now()) 
+	if(state.lastEntry + (closeOnEntryDelayMinutes * 60) > now())
     	return
-    
-    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
+
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent entry into ${interiorDoor.displayName}.")
+	state.lastEntry = 0
 }
 
 def onGarageDoorClosed(evt) {
