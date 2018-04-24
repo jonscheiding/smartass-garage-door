@@ -19,9 +19,9 @@ definition(
 	author: "Jon Scheiding",
 	description: "Garage door app with the smarts to get by in this world.",
 	category: "My Apps",
-	iconUrl: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn.png",
-	iconX2Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png",
-	iconX3Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png")
+	iconUrl: "https://png.icons8.com/material/30/000000/garage-closed.png",
+	iconX2Url: "https://png.icons8.com/material/60/000000/garage-closed.png",
+	iconX3Url: "https://png.icons8.com/material/90/000000/garage-closed.png")
 
 
 preferences {
