@@ -54,7 +54,7 @@ def onDriverArrived(evt) {
 
 	if(openOnArrival) {
     	if(now() < state.lastDeparture + (arrivalDebounceMinutes * 60 * 1000)) {
-        	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} minutes ago."
+        	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} minutes ago.", true
             return
         }
 
@@ -66,7 +66,7 @@ def onDriverDeparted(evt) {
 	state.lastDeparture = now()
 
 	if(closeOnDeparture)
-		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.")
+		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.", true)
 }
 
 def onInteriorDoorEntry(evt) {
@@ -82,7 +82,7 @@ def onInteriorDoorEntry(evt) {
 		state.lastArrival = 0
 	} else {
 		state.lastEntry = now()
-		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} minutes due to entry into ${interiorDoor.displayName}.", true)
+		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} minutes due to entry into ${interiorDoor.displayName}.")
 		runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
 		state.lastArrival = 0
 	}
@@ -112,14 +112,14 @@ def onModeChanged(evt) {
 
 	if(closeOnModes?.find { it == evt.value }) {
 		if(state.lastOpened < now() - 1 * 60 * 1000) {
-			notifyIfNecessary("Mode changed to ${evt.value}, but not closing ${doorSwitch.displayName} because it was just opened.")
+			notifyIfNecessary("Mode changed to ${evt.value}, but not closing ${doorSwitch.displayName} because it was just opened.", true)
 		}
 
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} because mode changed to ${evt.value}.")
 	}
 }
 
-def pushDoorSwitch(desiredState, msg) {
+def pushDoorSwitch(desiredState, msg, isNotice = false) {
 	if(doorContactSensor.currentContact == desiredState) {
 		notifyIfNecessary "${doorSwitch.displayName} will not be triggered because it is already ${desiredState}.", true
 		return
@@ -129,18 +129,20 @@ def pushDoorSwitch(desiredState, msg) {
 		return
 	}
 
-	notifyIfNecessary msg, false
+	notifyIfNecessary msg, isNotice
 	doorSwitch.push()
 }
 
 def notifyIfNecessary(msg, isNotice = false) {
 	log.info msg
+    
+	sendEverything = shouldSendPush == "1" || shouldSendPush == "All"
+	sendNotices = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
+    
 	log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
-	if(shouldSendPush == "0" || (shouldSendPush == "2" && !isNotice)) {
-		return
+	if(sendEverything || (sendNotices && isNotice)) {
+		sendPush msg
 	}
-
-	sendPush msg
 }
 
 def installed() {
