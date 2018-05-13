@@ -19,9 +19,9 @@ definition(
 	author: "Jon Scheiding",
 	description: "Garage door app with the smarts to get by in this world.",
 	category: "My Apps",
-	iconUrl: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn.png",
-	iconX2Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png",
-	iconX3Url: "http://cdn.device-icons.smartthings.com/Transportation/transportation13-icn@2x.png")
+	iconUrl: "https://png.icons8.com/material/30/000000/garage-closed.png",
+	iconX2Url: "https://png.icons8.com/material/60/000000/garage-closed.png",
+	iconX3Url: "https://png.icons8.com/material/90/000000/garage-closed.png")
 
 
 preferences {
@@ -82,7 +82,7 @@ def onInteriorDoorEntry(evt) {
 		state.lastArrival = 0
 	} else {
 		state.lastEntry = now()
-		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} due to entry into ${interiorDoor.displayName}.", true)
+		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} minutes due to entry into ${interiorDoor.displayName}.", true)
 		runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
 		state.lastArrival = 0
 	}
@@ -90,7 +90,10 @@ def onInteriorDoorEntry(evt) {
 
 def onEntryDelayExpired() {
 	if(state.lastEntry + (closeOnEntryDelayMinutes * 60) > now())
-    	return
+		return
+
+	if(state.lastClosed > state.lastEntry)
+		return
 
     pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent entry into ${interiorDoor.displayName}.")
 	state.lastEntry = 0
