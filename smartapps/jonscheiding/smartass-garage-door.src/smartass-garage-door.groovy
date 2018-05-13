@@ -80,11 +80,12 @@ def onInteriorDoorEntry(evt) {
     if(closeOnEntryDelayMinutes <= 0) {
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
 		state.lastArrival = 0
-    } else {
-        state.lastEntry = now()
-		notifyIfNecessary("Will close ${doorSwitch.displayName} in ${closeOnEntryDelayMinutes} due to entry into ${interiorDoor.displayName}.", true)
-        runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
-    }
+	} else {
+		state.lastEntry = now()
+		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} due to entry into ${interiorDoor.displayName}.", true)
+		runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
+		state.lastArrival = 0
+	}
 }
 
 def onEntryDelayExpired() {
