@@ -100,11 +100,20 @@ def onGarageDoorClosed(evt) {
 	state.lastClosed = now()
 }
 
+def onGarageDoorOpen(evt) {
+	state.lastOpened = now()
+}
+
 def onModeChanged(evt) {
 	if(!closeOnModes) return
 
-	if(closeOnModes?.find { it == evt.value })
+	if(closeOnModes?.find { it == evt.value }) {
+		if(state.lastOpened < now() - 1 * 60 * 1000) {
+			notifyIfNecessary("Mode changed to ${evt.value}, but not closing ${doorSwitch.displayName} because it was just opened.")
+		}
+
 		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} because mode changed to ${evt.value}.")
+	}
 }
 
 def pushDoorSwitch(desiredState, msg) {
@@ -149,6 +158,7 @@ def initialize() {
 	subscribe(driver, "presence.not present", onDriverDeparted)
 
 	subscribe(doorContactSensor, "contact.closed", onGarageDoorClosed)
+	subscribe(doorContactSensor, "contact.open", onGarageDoorOpen)
 
 	subscribe(location, "mode", onModeChanged)
 
