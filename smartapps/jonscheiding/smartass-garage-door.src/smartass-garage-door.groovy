@@ -136,8 +136,8 @@ def pushDoorSwitch(desiredState, msg, isNotice = false) {
 def notifyIfNecessary(msg, isNotice = false) {
 	log.info msg
     
-	sendEverything = shouldSendPush == "1" || shouldSendPush == "All"
-	sendNotices = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
+	def sendEverything = shouldSendPush == "1" || shouldSendPush == "All"
+	def sendNotices = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
     
 	log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
 	if(sendEverything || (sendNotices && isNotice)) {
