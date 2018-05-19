@@ -111,7 +111,7 @@ def onModeChanged(evt) {
 	if(!closeOnModes) return
 
 	if(closeOnModes?.find { it == evt.value }) {
-		if(state.lastOpened < now() - 1 * 60 * 1000) {
+		if(state.lastOpened > now() - (1 * 60 * 1000)) {
 			notifyIfNecessary("Mode changed to ${evt.value}, but not closing ${doorSwitch.displayName} because it was just opened.", true)
 		}
 
