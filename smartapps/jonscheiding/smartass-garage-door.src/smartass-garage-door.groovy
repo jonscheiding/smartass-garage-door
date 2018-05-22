@@ -78,7 +78,7 @@ def onInteriorDoorEntry(evt) {
 		return
 
     if(closeOnEntryDelayMinutes <= 0) {
-		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.")
+		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to entry into ${interiorDoor.displayName}.", true)
 		state.lastArrival = 0
 	} else {
 		state.lastEntry = now()
@@ -95,7 +95,7 @@ def onEntryDelayExpired() {
 	if(state.lastClosed > state.lastEntry)
 		return
 
-    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent entry into ${interiorDoor.displayName}.")
+    pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent entry into ${interiorDoor.displayName}.", true)
 	state.lastEntry = 0
 }
 
@@ -121,7 +121,7 @@ def onModeChanged(evt) {
 
 def pushDoorSwitch(desiredState, msg, isNotice = false) {
 	if(doorContactSensor.currentContact == desiredState) {
-		notifyIfNecessary "${doorSwitch.displayName} will not be triggered because it is already ${desiredState}.", true
+		notifyIfNecessary "${doorSwitch.displayName} will not be triggered because it is already ${desiredState}.", false
 		return
 	}
 	if(doorAccelerationSensor && doorAccelerationSensor.currentAcceleration == "active") {
@@ -137,10 +137,10 @@ def notifyIfNecessary(msg, isNotice = false) {
 	log.info msg
     
 	def sendEverything = shouldSendPush == "1" || shouldSendPush == "All"
-	def sendNotices = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
+	def sendNoticesOnly = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
     
 	log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
-	if(sendEverything || (sendNotices && isNotice)) {
+	if(sendEverything || (sendNoticesOnly && isNotice)) {
 		sendPush msg
 	}
 }
