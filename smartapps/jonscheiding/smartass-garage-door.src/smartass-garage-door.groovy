@@ -43,6 +43,7 @@ preferences {
 		input "openOnArrival", "bool", title: "Open On Arrival", defaultValue: true
         input "arrivalDebounceMinutes", "number", title: "... Except Minutes After Departure", defaultValue: 0
 		input "closeOnDeparture", "bool", title: "Close On Departure", defaultValue: true
+        input "closeOnDepartureDelayMinutes", "number", title: "... After Minutes", defaultValue: 0
 		input "closeOnEntry", "enum", title: "Close On Interior Door Entry", defaultValue: "Never", options: ["Never", "Open", "Closed"]
         input "closeOnEntryDelayMinutes", "number", title: "... After Minutes", defaultValue: 0
 		input "closeOnModes", "mode", title: "Close When Entering Mode", multiple: true, required: false
@@ -65,8 +66,13 @@ def onDriverArrived(evt) {
 def onDriverDeparted(evt) {
 	state.lastDeparture = now()
 
-	if(closeOnDeparture)
-		pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.", true)
+	if(closeOnDeparture) {
+		if (closeOnDepartureDelayMinutes <= 0) {
+			pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.", true)
+		} else {
+			runIn(closeOnDepartureDelayMinutes * 60, onDepartureDelayExpired)
+		}
+	}
 }
 
 def onInteriorDoorEntry(evt) {
@@ -97,6 +103,17 @@ def onEntryDelayExpired() {
 
     pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent entry into ${interiorDoor.displayName}.", true)
 	state.lastEntry = 0
+}
+
+def onDepartureDelayExpired() {
+	if(state.lastDeparture + (closeOnDepartureDelayMinutes * 60) > now())
+		return
+
+	if(state.lastClosed > state.lastDeparture)
+		return
+
+	pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to recent departure of ${driver.displayName}.", true)
+	state.lastDeparture = 0
 }
 
 def onGarageDoorClosed(evt) {
