@@ -50,11 +50,19 @@ preferences {
 	}
 }
 
+def minutesToSeconds() {
+	return 60;
+}
+
+def minutesToMilliseconds() {
+	return minutesToSeconds() * 1000;
+}
+
 def onDriverArrived(evt) {
 	state.lastArrival = now()
 
 	if(openOnArrival) {
-    	if(now() < state.lastDeparture + (arrivalDebounceMinutes * 60 * 1000)) {
+    	if(now() < state.lastDeparture + (arrivalDebounceMinutes * minutesToMilliseconds())) {
         	notifyIfNecessary "${doorSwitch.displayName} will not be triggered because ${driver.displayName} left less than ${arrivalDebounceMinutes} minutes ago.", true
             return
         }
@@ -70,7 +78,7 @@ def onDriverDeparted(evt) {
 		if (closeOnDepartureDelayMinutes <= 0) {
 			pushDoorSwitch("closed", "Closing ${doorSwitch.displayName} due to departure of ${driver.displayName}.", true)
 		} else {
-			runIn(closeOnDepartureDelayMinutes * 60, onDepartureDelayExpired)
+			runIn(closeOnDepartureDelayMinutes * minutesToSeconds(), onDepartureDelayExpired)
 		}
 	}
 }
@@ -80,7 +88,7 @@ def onInteriorDoorEntry(evt) {
 
 	if(state.lastArrival < state.lastClosed)
 		return
-	if(state.lastArrival < (now() - (expirationMinutes * 60 * 1000)))
+	if(state.lastArrival < (now() - (expirationMinutes * minutesToMilliseconds())))
 		return
 
     if(closeOnEntryDelayMinutes <= 0) {
@@ -89,13 +97,13 @@ def onInteriorDoorEntry(evt) {
 	} else {
 		state.lastEntry = now()
 		notifyIfNecessary("${doorSwitch.displayName} will close in ${closeOnEntryDelayMinutes} minutes due to entry into ${interiorDoor.displayName}.")
-		runIn(closeOnEntryDelayMinutes * 60, onEntryDelayExpired)
+		runIn(closeOnEntryDelayMinutes * minutesToSeconds(), onEntryDelayExpired)
 		state.lastArrival = 0
 	}
 }
 
 def onEntryDelayExpired() {
-	if(state.lastEntry + (closeOnEntryDelayMinutes * 60) > now())
+	if(state.lastEntry + (closeOnEntryDelayMinutes * minutesToMilliseconds()) > now())
 		return
 
 	if(state.lastClosed > state.lastEntry)
@@ -106,7 +114,7 @@ def onEntryDelayExpired() {
 }
 
 def onDepartureDelayExpired() {
-	if(state.lastDeparture + (closeOnDepartureDelayMinutes * 60) > now())
+	if(state.lastDeparture + (closeOnDepartureDelayMinutes * minutesToMilliseconds) > now())
 		return
 
 	if(state.lastClosed > state.lastDeparture)
@@ -128,7 +136,7 @@ def onModeChanged(evt) {
 	if(!closeOnModes) return
 
 	if(closeOnModes?.find { it == evt.value }) {
-		if(state.lastOpened > now() - (1 * 60 * 1000)) {
+		if(state.lastOpened > now() - (1 * minutesToMilliseconds())) {
 			notifyIfNecessary("Mode changed to ${evt.value}, but not closing ${doorSwitch.displayName} because it was just opened.", true)
 		}
 
@@ -152,10 +160,10 @@ def pushDoorSwitch(desiredState, msg, isNotice = false) {
 
 def notifyIfNecessary(msg, isNotice = false) {
 	log.info msg
-    
+
 	def sendEverything = shouldSendPush == "1" || shouldSendPush == "All"
 	def sendNoticesOnly = sendEverything || shouldSendPush == "2" || shouldSendPush == "Notices"
-    
+
 	log.debug("shouldSendPush=${shouldSendPush}, isNotice=${isNotice}")
 	if(sendEverything || (sendNoticesOnly && isNotice)) {
 		sendPush msg
